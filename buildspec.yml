@@ -9,11 +9,12 @@ phases:
     commands:
       - echo "Building the Docker image..."
       - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 503561445201.dkr.ecr.ap-south-1.amazonaws.com
-      - docker build -t flask-app .
-      - docker run -d -p 8080:80 flask-app 
+      - docker build -t flask-app . 
       - docker tag flask-app:latest 503561445201.dkr.ecr.ap-south-1.amazonaws.com/flask-app:latest
   post_build:
     commands:
       - echo "Pushing the Docker image to ECR..."
       - docker push 503561445201.dkr.ecr.ap-south-1.amazonaws.com/flask-app:latest
+      - echo "Running Docker Container..."
+      - docker container run -d -p 80:80 flask-app
       
