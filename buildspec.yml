@@ -9,7 +9,7 @@ phases:
     commands:
       - echo "Building the Docker image..."
       - docker build -t flask-app .
-      - $(aws ecr get-login --no-include-email --region ap-south-1)
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 503561445201.dkr.ecr.ap-south-1.amazonaws.com
       - docker tag flask-app:latest 503561445201.dkr.ecr.ap-south-1.amazonaws.com/flask-app:latest
   post_build:
     commands:
