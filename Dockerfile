@@ -19,6 +19,10 @@ RUN pip install flask
 # Define environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
+ENV FLASK_RUN_PORT=80
+
+# Install Gunicorn 
+RUN pip install gunicorn
 
 # Run the application
-CMD ["flask", "run", "--host=0.0.0.0", "--port=80"]
+CMD ["gunicorn", "--bind", "0.0.0.0:80", "app:app"]
