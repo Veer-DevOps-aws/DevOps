@@ -8,10 +8,10 @@ phases:
   build:
     commands:
       - echo "Building the Docker image..."
-      - docker build -t my-python-app .
-      - $(aws ecr get-login --no-include-email --region us-west-2)
-      - docker tag my-python-app:latest <aws_account_id>.dkr.ecr.us-west-2.amazonaws.com/my-python-app:latest
+      - docker build -t flask-app .
+      - $(aws ecr get-login --no-include-email --region ap-south-1)
+      - docker tag flask-app:latest 503561445201.dkr.ecr.ap-south-1.amazonaws.com/flask-app:latest
   post_build:
     commands:
       - echo "Pushing the Docker image to ECR..."
-      - docker push <aws_account_id>.dkr.ecr.us-west-2.amazonaws.com/my-python-app:latest
+      - docker push 503561445201.dkr.ecr.ap-south-1.amazonaws.com/flask-app:latest
