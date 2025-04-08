@@ -5,17 +5,32 @@ phases:
     commands:
       - echo "Installing dependencies..."
       - pip install -r requirements.txt
+
   build:
     commands:
+      - echo "Logging into Amazon ECR..."
       - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 503561445201.dkr.ecr.ap-south-1.amazonaws.com
       - echo "Building the Docker image..."
-      - docker build -t flask-app . 
-      - echo "Tag the image..."
+      - docker build -t flask-app .
+      - echo "Tagging the image..."
       - docker tag flask-app:latest 503561445201.dkr.ecr.ap-south-1.amazonaws.com/flask-app:latest
+
   post_build:
     commands:
       - echo "Pushing the Docker image to ECR..."
       - docker push 503561445201.dkr.ecr.ap-south-1.amazonaws.com/flask-app:latest
-      - echo "Running Docker Container..."
-      - docker container run -d -p 80:80 flask-app
-      
+
+      # Trigger EC2 to pull the Docker image from ECR and run the container using SSM
+      - echo "Triggering EC2 to pull the latest image and run the container..."
+      - |
+        aws ssm send-command \
+          --instance-ids "i-08c68110b837d9ce3" \ # Replace with your EC2 Instance ID
+          --document-name "AWS-RunShellScript" \
+          --comment "Pull Docker image and run container" \
+          --parameters 'commands=["aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 503561445201.dkr.ecr.ap-south-1.amazonaws.com", "docker pull 503561445201.dkr.ecr.ap-south-1.amazonaws.com/flask-app:latest", "docker stop flask-app || true", "docker rm flask-app || true", "docker run -d -p 80:80 --name flask-app 503561445201.dkr.ecr.ap-south-1.amazonaws.com/flask-app:latest"]'
+
+artifacts:
+  files:
+    - Dockerfile
+    - '**/*'
+  discard-paths: yes
